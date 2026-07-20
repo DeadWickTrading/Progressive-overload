@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PROTOCOL V — Training Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0B0714; --panel:#150E22; --line:rgba(178,140,255,.16);
+    --plasma:#FF2D78; --iris:#7B4CFF; --ion:#00E6CF; --amber:#FFC46B;
+    --text:#EFE8FF; --muted:#8E82AB;
+    --display:'Chakra Petch',system-ui,sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{background:var(--void);color:var(--text);font-family:var(--body);min-height:100vh;padding-bottom:120px;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60vw 40vh at 85% -5%, rgba(255,45,120,.22), transparent 70%),
+      radial-gradient(55vw 40vh at 0% 15%, rgba(123,76,255,.20), transparent 70%),
+      radial-gradient(70vw 50vh at 50% 105%, rgba(0,230,207,.08), transparent 70%)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+  .wrap{position:relative;z-index:2;max-width:640px;margin:0 auto;padding:20px 16px 0}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.14em;line-height:1;
+    background:linear-gradient(100deg,var(--plasma),var(--iris) 60%,var(--ion));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.32em;color:var(--muted);
+    -webkit-text-fill-color:var(--muted);margin-top:6px;font-weight:400}
+  .stamp{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;line-height:1.6}
+  .stamp b{color:var(--ion);font-weight:600}
+
+  .tabs{display:flex;gap:6px;margin:0 0 16px}
+  .tab{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);
+    font-family:var(--mono);font-size:10px;letter-spacing:.16em;cursor:pointer}
+  .tab.on{color:var(--text);border-color:var(--plasma);background:rgba(255,45,120,.1)}
+
+  .rail{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:12px;padding:9px 13px;
+    cursor:pointer;transition:.18s;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.08em;color:var(--muted)}
+  .chip .f{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;margin-top:3px;opacity:.7;font-weight:400}
+  .chip.today{border-color:rgba(0,230,207,.4)}
+  .chip.on{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--plasma),var(--iris));
+    box-shadow:0 6px 24px -8px rgba(255,45,120,.75)}
+
+  .title{font-family:var(--display);font-size:19px;letter-spacing:.05em;font-weight:700;margin:4px 0 2px}
+  .sub{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+  .card{border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;
+    background:linear-gradient(180deg,var(--panel),rgba(21,14,34,.55));backdrop-filter:blur(8px)}
+  .card.done{border-color:rgba(0,230,207,.35)}
+  .chead{display:flex;align-items:center;gap:11px;padding:11px 13px;cursor:pointer}
+  .glyph{flex:0 0 auto;width:48px;height:56px;border-radius:11px;border:1px solid var(--line);
+    background:radial-gradient(circle at 50% 40%,rgba(123,76,255,.18),transparent 70%);cursor:pointer;overflow:hidden}
+  .cname{flex:1;min-width:0}
+  .cname h3{margin:0;font-family:var(--display);font-size:15px;font-weight:600;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cname p{margin:3px 0 0;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.05em}
+  .cname p b{color:var(--amber);font-weight:600}
+  .pill{font-family:var(--mono);font-size:10px;font-weight:600;padding:5px 8px;border-radius:8px;border:1px solid var(--line);color:var(--muted);flex:0 0 auto}
+  .card.done .pill{color:var(--ion);border-color:rgba(0,230,207,.3)}
+
+  .sets{display:none;padding:2px 12px 12px;border-top:1px solid var(--line)}
+  .card.open .sets{display:block}
+  .row{display:flex;align-items:center;gap:8px;padding:8px 2px}
+  .snum{font-family:var(--mono);font-size:9px;color:var(--muted);width:26px;letter-spacing:.1em}
+  .fld{flex:1;position:relative}
+  .fld input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;color:var(--text);
+    font-family:var(--mono);font-size:15px;font-weight:600;padding:10px 30px 10px 11px;outline:none;transition:.15s}
+  .fld input:focus{border-color:var(--plasma);background:rgba(255,45,120,.07)}
+  .fld span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--muted);pointer-events:none}
+  .tick{flex:0 0 auto;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.02);
+    color:var(--muted);cursor:pointer;font-size:16px;display:grid;place-items:center;transition:.18s}
+  .tick.on{background:linear-gradient(135deg,var(--ion),#0FA8A0);border-color:transparent;color:#04211F;box-shadow:0 6px 20px -8px rgba(0,230,207,.9)}
+  .note{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.06em;padding:4px 2px 8px;line-height:1.6}
+  .note em{color:var(--plasma);font-style:normal}
+
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(14px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(11,7,20,0),rgba(11,7,20,.92) 30%);backdrop-filter:blur(14px)}
+  .dockin{max-width:640px;margin:0 auto}
+  .tube{height:12px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);overflow:hidden;position:relative}
+  .charge{height:100%;width:0;border-radius:99px;transition:width .5s cubic-bezier(.2,.9,.2,1);
+    background:linear-gradient(90deg,var(--iris),var(--plasma) 60%,var(--amber));box-shadow:0 0 18px rgba(255,45,120,.8)}
+  .tube::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 13px,rgba(11,7,20,.55) 13px 14px)}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:10px}
+  .meta div{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+  .meta b{color:var(--text);font-weight:800;font-size:13px}
+  .btn{border:none;border-radius:11px;padding:11px 15px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:12px;
+    letter-spacing:.12em;color:#fff;background:linear-gradient(135deg,var(--plasma),var(--iris));box-shadow:0 8px 26px -10px rgba(255,45,120,.9)}
+  .btn:active{transform:translateY(1px)}
+
+  .rest{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(20px);z-index:25;display:none;align-items:center;gap:10px;
+    padding:9px 12px;border-radius:99px;border:1px solid rgba(0,230,207,.35);background:rgba(6,32,30,.9);backdrop-filter:blur(10px);
+    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ion);box-shadow:0 10px 30px -12px rgba(0,230,207,.6);opacity:0;transition:.25s}
+  .rest.on{display:flex;opacity:1;transform:translateX(-50%) translateY(0)}
+  .rest button{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 2px}
+
+  .hrow{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:12px;
+    margin-bottom:8px;background:rgba(255,255,255,.02)}
+  .hrow .l{font-family:var(--display);font-size:14px;font-weight:600}
+  .hrow .l small{display:block;font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.08em}
+  .hrow .r{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--plasma)}
+  .hrow .r small{display:block;font-size:9px;color:var(--muted);font-weight:400;text-align:right;margin-top:2px}
+  .empty{border:1px dashed var(--line);border-radius:14px;padding:26px 18px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.9}
+  .flash{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:60;padding:10px 16px;border-radius:99px;font-family:var(--mono);
+    font-size:11px;font-weight:600;color:#150E22;background:var(--amber);box-shadow:0 10px 30px -10px rgba(255,196,107,.8);opacity:0;transition:.3s;pointer-events:none}
+  .flash.on{opacity:1}
+
+  /* ---------- form overlay ---------- */
+  .veil{position:fixed;inset:0;z-index:50;display:none;background:rgba(5,3,10,.8);backdrop-filter:blur(10px);
+    align-items:flex-end;justify-content:center}
+  .veil.on{display:flex}
+  .sheet{width:100%;max-width:640px;background:linear-gradient(180deg,#1A1229,#0E0918);border:1px solid var(--line);
+    border-radius:22px 22px 0 0;padding:18px 18px calc(24px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.9,.2,1)}
+  @keyframes up{from{transform:translateY(40px);opacity:0}}
+  .sheet h2{font-family:var(--display);font-size:20px;margin:0 0 2px;letter-spacing:.03em}
+  .sheet .tag{font-family:var(--mono);font-size:10px;color:var(--ion);letter-spacing:.18em;margin-bottom:12px}
+  .stage{height:210px;border-radius:16px;border:1px solid var(--line);margin-bottom:14px;
+    background:radial-gradient(circle at 50% 45%,rgba(123,76,255,.22),transparent 65%),repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 4px)}
+  .cues{list-style:none;padding:0;margin:0 0 14px}
+  .cues li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;padding:7px 0;color:#D9CFF2}
+  .cues li::before{content:"";flex:0 0 auto;width:6px;height:6px;border-radius:2px;margin-top:7px;
+    background:linear-gradient(135deg,var(--plasma),var(--iris))}
+  .srow{display:flex;gap:8px}
+  .srow a,.srow button{flex:1;text-align:center;text-decoration:none;padding:12px;border-radius:12px;cursor:pointer;
+    font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.1em;border:1px solid var(--line);background:transparent;color:var(--muted)}
+  .srow a{color:var(--text);border-color:rgba(255,45,120,.45);background:rgba(255,45,120,.1)}
+
+  /* ================= THE RIG ================= */
+  @property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @property --b{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @property --c{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @property --d{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @property --e{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @property --y{syntax:'<length>';inherits:false;initial-value:0px}
+  .rig{width:100%;height:100%;display:block}
+  .rig .bone{stroke:var(--iris);stroke-width:6;stroke-linecap:round;fill:none;filter:drop-shadow(0 0 4px rgba(123,76,255,.9))}
+  .rig .core{stroke:var(--plasma);filter:drop-shadow(0 0 5px rgba(255,45,120,.9))}
+  .rig .load{fill:var(--amber);filter:drop-shadow(0 0 5px rgba(255,196,107,.9))}
+  .rig .bar{stroke:rgba(255,255,255,.25);stroke-width:3;stroke-linecap:round}
+  .rig .body{transform:translateY(var(--y))}
+  .rig .upper{transform:translate(60px,90px) rotate(var(--e)) translate(-60px,-90px)}
+  .rig .arm  {transform:translate(60px,44px) rotate(var(--a)) translate(-60px,-44px)}
+  .rig .fore {transform:translate(60px,68px) rotate(var(--b)) translate(-60px,-68px)}
+  .rig .thigh{transform:translate(60px,92px) rotate(var(--c)) translate(-60px,-92px)}
+  .rig .shin {transform:translate(60px,120px) rotate(var(--d)) translate(-60px,-120px)}
+  .rig *{animation-timing-function:cubic-bezier(.45,.05,.35,1);animation-iteration-count:infinite}
+
+  /* press */
+  .r-press .arm{--a:104deg;animation:pA 2.4s}   @keyframes pA{0%,100%{--a:104deg}45%{--a:158deg}}
+  .r-press .fore{--b:76deg;animation:pB 2.4s}   @keyframes pB{0%,100%{--b:76deg}45%{--b:22deg}}
+  /* lateral raise */
+  .r-lat .arm{--a:8deg;animation:lA 2.4s}       @keyframes lA{0%,100%{--a:8deg}50%{--a:90deg}}
+  .r-lat .fore{--b:8deg}
+  /* fly / rear delt / pull-apart */
+  .r-fly .arm{--a:44deg;animation:fA 2.6s}      @keyframes fA{0%,100%{--a:44deg}50%{--a:100deg}}
+  .r-fly .fore{--b:26deg}
+  /* barbell row (hinged) */
+  .r-row .upper{--e:-52deg}
+  .r-row .arm{--a:0deg;animation:rA 2.4s}       @keyframes rA{0%,100%{--a:0deg}50%{--a:26deg}}
+  .r-row .fore{--b:0deg;animation:rB 2.4s}      @keyframes rB{0%,100%{--b:0deg}50%{--b:-98deg}}
+  /* upright row / face pull */
+  .r-high .arm{--a:6deg;animation:hA 2.2s}      @keyframes hA{0%,100%{--a:6deg}50%{--a:74deg}}
+  .r-high .fore{--b:14deg;animation:hB 2.2s}    @keyframes hB{0%,100%{--b:14deg}50%{--b:56deg}}
+  /* pulldown + pull-up */
+  .r-pull .arm{--a:164deg;animation:uA 2.6s}    @keyframes uA{0%,100%{--a:164deg}50%{--a:126deg}}
+  .r-pull .fore{--b:0deg;animation:uB 2.6s}     @keyframes uB{0%,100%{--b:0deg}50%{--b:-54deg}}
+  .r-pullup .body{animation:uY 2.6s}            @keyframes uY{0%,100%{--y:0px}50%{--y:-15px}}
+  /* straight-arm pulldown */
+  .r-sap .upper{--e:-14deg}
+  .r-sap .arm{--a:148deg;animation:sA 2.4s}     @keyframes sA{0%,100%{--a:148deg}50%{--a:92deg}}
+  .r-sap .fore{--b:6deg}
+  /* curl */
+  .r-curl .arm{--a:6deg}
+  .r-curl .fore{--b:0deg;animation:cB 2.2s}     @keyframes cB{0%,100%{--b:0deg}50%{--b:-124deg}}
+  /* overhead triceps */
+  .r-tri .arm{--a:166deg}
+  .r-tri .fore{--b:-138deg;animation:tB 2.2s}   @keyframes tB{0%,100%{--b:-138deg}50%{--b:-8deg}}
+  /* squat / leg press */
+  .r-squat .upper{--e:0deg;animation:qE 2.6s}   @keyframes qE{0%,100%{--e:0deg}50%{--e:-18deg}}
+  .r-squat .thigh{--c:0deg;animation:qC 2.6s}   @keyframes qC{0%,100%{--c:0deg}50%{--c:-50deg}}
+  .r-squat .shin{--d:0deg;animation:qD 2.6s}    @keyframes qD{0%,100%{--d:0deg}50%{--d:56deg}}
+  .r-squat .body{animation:qY 2.6s}             @keyframes qY{0%,100%{--y:0px}50%{--y:9px}}
+  .r-squat .arm{--a:4deg}
+  .r-split .mir .thigh,.r-split .mir .shin{animation-delay:-1.3s}
+  /* hinge / RDL */
+  .r-hinge .upper{--e:0deg;animation:gE 2.8s}   @keyframes gE{0%,100%{--e:0deg}50%{--e:-60deg}}
+  .r-hinge .thigh{--c:0deg;animation:gC 2.8s}   @keyframes gC{0%,100%{--c:0deg}50%{--c:12deg}}
+  .r-hinge .arm{--a:0deg}
+  /* leg curl */
+  .r-lcurl .shin{--d:0deg;animation:nD 2.2s}    @keyframes nD{0%,100%{--d:0deg}50%{--d:-108deg}}
+  .r-lcurl .arm{--a:6deg}
+  /* calf */
+  .r-calf .body{animation:vY 1.8s}              @keyframes vY{0%,100%{--y:0px}50%{--y:-11px}}
+  .r-calf .arm{--a:6deg}
+  /* hanging leg raise */
+  .r-legraise .arm{--a:172deg}
+  .r-legraise .thigh{--c:0deg;animation:xC 2.6s} @keyframes xC{0%,100%{--c:0deg}50%{--c:-92deg}}
+  .r-legraise .shin{--d:0deg;animation:xD 2.6s}  @keyframes xD{0%,100%{--d:0deg}50%{--d:-14deg}}
+  /* plank */
+  .r-plank .body{transform:rotate(-72deg);transform-origin:60px 92px;animation:kO 3s}
+  @keyframes kO{0%,100%{opacity:.85}50%{opacity:1}}
+  .r-plank .arm{--a:76deg} .r-plank .fore{--b:0deg}
+  @media (prefers-reduced-motion:reduce){.rig *{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">PROTOCOL V<small>V-TAPER · SHOULDER BIAS</small></div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="train">TRAIN</button>
+    <button class="tab" data-tab="log">HISTORY</button>
+  </div>
+
+  <div id="train">
+    <div class="rail" id="rail"></div>
+    <div class="title" id="dayTitle"></div>
+    <div class="sub" id="daySub"></div>
+    <div id="list"></div>
+  </div>
+  <div id="log" style="display:none"></div>
+</div>
+
+<div class="rest" id="rest"><span id="restT">1:30</span><button id="restX">✕</button></div>
+<div class="flash" id="flash"></div>
+
+<div class="veil" id="veil">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<div class="dock">
+  <div class="dockin">
+    <div class="tube"><div class="charge" id="charge"></div></div>
+    <div class="meta">
+      <div>SETS <b id="mSets">0/0</b></div>
+      <div>TONNAGE <b id="mTon">0</b> KG</div>
+      <button class="btn" id="save">SAVE SESSION</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= RIG ================= */
+function rig(kind,load){
+  const arm=`<g class="arm"><path class="bone" d="M60 44 L60 68"/>
+      <g class="fore"><path class="bone" d="M60 68 L60 90"/>
+      ${load?'<circle class="load" cx="60" cy="92" r="5.5"/>':''}</g></g>`;
+  const leg=`<g class="thigh"><path class="bone" d="M60 92 L60 120"/>
+      <g class="shin"><path class="bone" d="M60 120 L60 148"/></g></g>`;
+  const mir=s=>`<g transform="translate(120,0) scale(-1,1)">${s}</g>`;
+  const bar=(kind==='pull'||kind==='pullup'||kind==='legraise')?'<path class="bar" d="M22 16 L98 16"/>':'';
+  return `<svg class="rig r-${kind} ${kind==='pullup'?'r-pull r-pullup':''} ${kind==='split'?'r-squat r-split':''}"
+      viewBox="0 0 120 160" aria-hidden="true">
+    ${bar}
+    <g class="body">
+      <g class="upper">
+        <circle class="bone core" cx="60" cy="26" r="8" fill="none"/>
+        <path class="bone core" d="M60 34 L60 92"/>
+        ${arm}${mir(arm)}
+      </g>
+      ${leg}${mir(leg)}
+    </g></svg>`;
+}
+
+/* ================= PROGRAM ================= */
+const YT=n=>'https://www.youtube.com/results?search_query='+encodeURIComponent(n+' proper form');
+const P_=(n,s,r,w,k,u,cues,note)=>({n,s,r,w,k,u,cues,note});
+const PROGRAM={
+ mon:{name:'Chest + Shoulders',focus:'PRESS',ex:[
+  P_('Incline Dumbbell Press',4,'8–10',30,'press',null,
+    ['Bench at 30° — higher pushes the work into your front delts.','Elbows slightly in front of the shoulders, not flared to the sides.','Shoulder blades pulled back and down, chest stays high the whole set.'],
+    'Top set was 30kg × 11 — take it to 12, or go 32.5.'),
+  P_('Incline Cable Fly',3,'12',5,'fly','plates',['Soft elbow, locked angle — the arc is the exercise.','Squeeze at the middle, stretch under control.']),
+  P_('Machine Chest Press',3,'10',80,'press',null,['Wrists stacked over elbows.','Stop just short of lockout to keep tension.']),
+  P_('Dumbbell Shoulder Press',4,'6–8',25,'press',null,['Ribs down, no lower-back arch.','Press slightly forward of the ears, not behind.']),
+  P_('Lateral Raises',5,'12–15',7.5,'lat',null,['Lead with the elbow, pinky a touch high.','Stop at shoulder height — above it the traps take over.','No swing. This is the width builder.']),
+  P_('Cable Lateral Raises',3,'12',2,'lat','plates',['Cable behind the leg, lean slightly away.','Constant tension — no rest at the bottom.']),
+  P_('Pull-ups',3,'8–10',0,'pullup','bw',['Chest to the bar, elbows driving down.','Full hang each rep.']),
+  P_('Hanging Leg Raises',3,'12',0,'legraise','bw',['Curl the pelvis up — it is not a hip swing.','Lower slowly, no kipping.'])
+ ]},
+ tue:{name:'Back Width + Biceps',focus:'LATS',ex:[
+  P_('Pull-ups',4,'10',0,'pullup','bw',['Wide grip, chest up.','Think elbows to pockets.']),
+  P_('Wide Grip Lat Pulldown',3,'12',75,'pull',null,['Bar to the collarbone, slight lean back.','Stretch fully at the top.']),
+  P_('Straight Arm Pulldown',3,'12',45,'sap',null,['Arms stay straight — only the shoulder moves.','Slow, feel the lat. Key V-taper move.']),
+  P_('Reverse Pec Deck',4,'15',50,'fly',null,['Light weight, wide squeeze.','Thumbs back at the end range.']),
+  P_('Incline Dumbbell Curls',3,'12',15,'curl',null,['Upper arm stays behind the torso for the stretch.']),
+  P_('Hammer Curls',3,'12',12.5,'curl',null,['Neutral grip, no swinging the elbows forward.']),
+  P_('Lateral Raises',3,'16',7.5,'lat',null,['Strict. Stop at shoulder height.']),
+  P_('Hanging Leg Raises',3,'12',0,'legraise','bw',['Curl the pelvis, control the drop.'])
+ ]},
+ wed:{name:'Legs — light',focus:'BOXING PM',ex:[
+  P_('Bulgarian Split Squat',3,'11',17.5,'split',null,['Front shin near vertical, torso slightly forward.','Drive through the mid-foot.']),
+  P_('Romanian Deadlift',3,'11',22.5,'hinge',null,['Push the hips back, bar close to the legs.','Stop when the hamstrings run out of stretch.']),
+  P_('Crossing Lunges',3,'22',22.5,'split',null,['Step behind and across, knee tracks the toe.']),
+  P_('Leg Curl',3,'12',0,'lcurl',null,['Hips flat, no lifting off the pad.']),
+  P_('Hanging Leg Raises',3,'12',0,'legraise','bw',['Curl the pelvis, control the drop.'])
+ ]},
+ thu:{name:'Shoulder Specialization',focus:'DELTS',ex:[
+  P_('Seated Dumbbell Press',4,'10',27.5,'press',null,['Back flat to the pad, ribs down.','Elbows just in front of the body.']),
+  P_('Giant Set · Lateral Raises',4,'16',7.5,'lat',null,['Round one of three — no rest into the next move.'],'Giant set — run the next two straight after.'),
+  P_('Giant Set · Cable Lateral Raises',4,'13',1,'lat','plates',['Constant tension, lean away from the stack.']),
+  P_('Giant Set · Rear Delt Fly',4,'16',45,'fly',null,['Chest supported, elbows lead, thumbs back.']),
+  P_('Upright Row',3,'13',12.5,'high',null,['Elbows out and up, stop at chest height.','Wider grip is kinder to the shoulder.']),
+  P_('Face Pulls',3,'15',40,'high',null,['Rope to the eyebrows, externally rotate at the end.']),
+  P_('Pull-ups',3,'9',0,'pullup','bw',['Full hang, chest to bar.']),
+  P_('Hanging Leg Raises',3,'12',0,'legraise','bw',['Curl the pelvis, control the drop.'])
+ ]},
+ fri:{name:'Back Thickness + Arms',focus:'ROWS',ex:[
+  P_('Barbell Row',4,'10',70,'row',null,['Hinge to ~45°, back flat.','Pull to the belly button, elbows tight.']),
+  P_('Chest Supported Row',3,'12',80,'row',null,['Chest glued to the pad — no body English.','Squeeze the shoulder blades at the top.']),
+  P_('EZ Bar Curls',3,'13',25,'curl',null,['Elbows pinned to the ribs.']),
+  P_('Cable Curls',3,'12',8,'curl','plates',['Constant tension, slow negative.']),
+  P_('Overhead Tricep Extension',3,'15',3,'tri','plates',['Elbows in and pointed forward.','Full stretch behind the head.']),
+  P_('Lateral Raises',3,'15',7.5,'lat',null,['Strict, controlled, stop at shoulder height.'])
+ ]},
+ sat:{name:'Legs — heavy',focus:'LOAD',ex:[
+  P_('Bulgarian Split Squat',4,'6',22.5,'split',null,['Heavy day — brace hard, control the descent.']),
+  P_('Romanian Deadlift',4,'8',22.5,'hinge',null,['Hips back, spine neutral, bar close.']),
+  P_('Leg Press',3,'10',170,'squat',null,['Feet mid-platform, no lower-back rounding at the bottom.']),
+  P_('Leg Curl',3,'12',11,'lcurl','plates',['Hips flat, slow negative.']),
+  P_('Calf Raises',4,'15',30,'calf',null,['Full stretch at the bottom, pause at the top.']),
+  P_('Hanging Leg Raises',3,'12',0,'legraise','bw',['Curl the pelvis, control the drop.'])
+ ]},
+ sun:{name:'Shoulder Pump',focus:'25–30 MIN',ex:[
+  P_('Lateral Raises',4,'20',5,'lat',null,['Light, short rest, four rounds through.'],'Pump style — 4 rounds, minimal rest.'),
+  P_('Rear Delt Fly',4,'20',5,'fly',null,['Wide squeeze, no momentum.']),
+  P_('Band Pull-Aparts',4,'20',0,'fly','band',['Straight arms, pull to the chest line.']),
+  P_('Plank',3,'60s',0,'plank','bw',['Ribs down, glutes on, neutral neck.'])
+ ]}
+};
+const KEYS=['mon','tue','wed','thu','fri','sat','sun'];
+const LBL={mon:'MON',tue:'TUE',wed:'WED',thu:'THU',fri:'FRI',sat:'SAT',sun:'SUN'};
+const STORE='protocolv-1';
+
+/* ================= STATE ================= */
+const todayKey=KEYS[(new Date().getDay()+6)%7];
+let day=todayKey,tab='train',db={sessions:{}},draft={},restTimer=null,restLeft=0,saving=null,flashT=null;
+const today=new Date().toISOString().slice(0,10);
+const $=id=>document.getElementById(id);
+
+async function load(){
+  try{const r=await window.storage.get(STORE); if(r&&r.value) db=JSON.parse(r.value);}catch(e){}
+  try{const d=await window.storage.get(STORE+'-draft'); if(d&&d.value){const p=JSON.parse(d.value); if(p.date===today&&p.day===day) draft=p.draft;}}catch(e){}
+  render();
+}
+function persistDraft(){clearTimeout(saving);saving=setTimeout(()=>{
+  window.storage.set(STORE+'-draft',JSON.stringify({date:today,day,draft})).catch(()=>{});},600);}
+
+function lastFor(n){const ds=Object.keys(db.sessions).sort().reverse();
+  for(const d of ds){const s=db.sessions[d].ex[n];
+    if(s&&s.length){const b=s.reduce((a,c)=>(c.w*c.r>a.w*a.r?c:a));return{date:d,w:b.w,r:b.r};}}return null;}
+function bestFor(n){let b=null;for(const d in db.sessions)(db.sessions[d].ex[n]||[]).forEach(s=>{if(!b||s.w>b.w||(s.w===b.w&&s.r>b.r))b={...s,date:d};});return b;}
+const tonnage=()=>{let t=0;for(const e in draft)for(const s in draft[e]){const x=draft[e][s];if(x.done)t+=(+x.w||0)*(+x.r||0);}return Math.round(t);};
+const doneCount=()=>{let n=0;for(const e in draft)for(const s in draft[e])if(draft[e][s].done)n++;return n;};
+const totalSets=()=>PROGRAM[day].ex.reduce((a,e)=>a+e.s,0);
+const unitOf=e=>e.u==='plates'?'pl':e.u==='bw'?'bw':e.u==='band'?'bd':'kg';
+
+/* ================= RENDER ================= */
+function render(){
+  $('stamp').innerHTML=new Date().toDateString().toUpperCase().slice(0,11)+'<br><b>'+Object.keys(db.sessions).length+'</b> SESSIONS LOGGED';
+  $('rail').innerHTML=KEYS.map(k=>`<button class="chip ${k===day?'on':''} ${k===todayKey?'today':''}" data-day="${k}">${LBL[k]}<span class="f">${PROGRAM[k].focus}</span></button>`).join('');
+  const P=PROGRAM[day];
+  $('dayTitle').textContent=P.name;
+  $('daySub').textContent=P.ex.length+' exercises · '+totalSets()+' sets · tap a figure for form';
+  $('list').innerHTML=P.ex.map((e,i)=>{
+    const d=draft[i]||{},done=Object.values(d).filter(x=>x.done).length,last=lastFor(e.n),u=unitOf(e);
+    const rows=Array.from({length:e.s},(_,j)=>{const v=d[j]||{};
+      return `<div class="row"><div class="snum">S${j+1}</div>
+        <div class="fld"><input inputmode="decimal" data-e="${i}" data-s="${j}" data-f="w" value="${v.w??''}" placeholder="${e.w||0}"><span>${u}</span></div>
+        <div class="fld"><input inputmode="numeric" data-e="${i}" data-s="${j}" data-f="r" value="${v.r??''}" placeholder="${String(e.r).replace(/[^0-9].*$/,'')||e.r}"><span>reps</span></div>
+        <button class="tick ${v.done?'on':''}" data-e="${i}" data-s="${j}">✓</button></div>`;}).join('');
+    return `<div class="card ${done===e.s?'done':''} ${done>0&&done<e.s?'open':''}" data-card="${i}">
+      <div class="chead" data-head="${i}">
+        <div class="glyph" data-form="${i}">${rig(e.k,!e.u||e.u==='plates')}</div>
+        <div class="cname"><h3>${e.n}</h3>
+          <p>${e.s} × ${e.r}${last?` · last <b>${last.w}${u} × ${last.r}</b>`:` · start ${e.w||'BW'}${e.w?u:''}`}</p></div>
+        <div class="pill">${done}/${e.s}</div>
+      </div>
+      <div class="sets">${e.note?`<div class="note"><em>▸</em> ${e.note}</div>`:''}${rows}</div>
+    </div>`;}).join('');
+  meters();
+}
+function meters(){const d=doneCount(),t=totalSets();
+  $('mSets').textContent=d+'/'+t;$('mTon').textContent=tonnage().toLocaleString();
+  $('charge').style.width=(t?d/t*100:0)+'%';}
+function renderLog(){
+  const dates=Object.keys(db.sessions).sort().reverse(),names=new Set(),prs=[];
+  for(const d in db.sessions)for(const n in db.sessions[d].ex)names.add(n);
+  names.forEach(n=>{const b=bestFor(n);if(b&&b.w>0)prs.push({n,...b});});
+  prs.sort((a,b)=>b.w-a.w);
+  $('log').innerHTML=(!dates.length
+    ?`<div class="empty">No sessions yet.<br>Log a set, hit SAVE SESSION, and your history builds here.</div>`
+    :`<div class="sub">Recent sessions</div>`+dates.slice(0,12).map(d=>{const s=db.sessions[d];let ton=0,sets=0;
+        for(const n in s.ex)s.ex[n].forEach(x=>{ton+=(+x.w||0)*(+x.r||0);sets++;});
+        return `<div class="hrow"><div class="l">${PROGRAM[s.day]?PROGRAM[s.day].name:s.day}<small>${d} · ${sets} sets</small></div>
+          <div class="r">${Math.round(ton).toLocaleString()}<small>KG MOVED</small></div></div>`;}).join('')
+     +(prs.length?`<div class="sub" style="margin-top:22px">Heaviest lifts</div>`+prs.slice(0,10).map(p=>
+        `<div class="hrow"><div class="l">${p.n}<small>${p.date}</small></div><div class="r">${p.w}<small>× ${p.r} REPS</small></div></div>`).join(''):''));
+}
+function openForm(i){
+  const e=PROGRAM[day].ex[i],u=unitOf(e);
+  $('sheet').innerHTML=`<h2>${e.n}</h2>
+    <div class="tag">${e.s} × ${e.r} · ${e.w?e.w+u:'BODYWEIGHT'}</div>
+    <div class="stage">${rig(e.k,!e.u||e.u==='plates')}</div>
+    <ul class="cues">${(e.cues||[]).map(c=>`<li>${c}</li>`).join('')}</ul>
+    <div class="srow">
+      <a href="${YT(e.n)}" target="_blank" rel="noopener">WATCH FORM VIDEO</a>
+      <button id="closeSheet">CLOSE</button>
+    </div>`;
+  $('veil').classList.add('on');
+}
+
+/* ================= EVENTS ================= */
+document.addEventListener('click',e=>{
+  if(e.target.id==='veil'||e.target.id==='closeSheet'){$('veil').classList.remove('on');return;}
+  const g=e.target.closest('[data-form]'); if(g){e.stopPropagation();openForm(+g.dataset.form);return;}
+  const chip=e.target.closest('.chip'); if(chip){day=chip.dataset.day;draft={};persistDraft();render();return;}
+  const head=e.target.closest('.chead'); if(head){document.querySelector(`[data-card="${head.dataset.head}"]`).classList.toggle('open');return;}
+  const tick=e.target.closest('.tick');
+  if(tick){
+    const i=+tick.dataset.e,j=+tick.dataset.s,ex=PROGRAM[day].ex[i];
+    draft[i]=draft[i]||{}; const cur=draft[i][j]||{};
+    const card=document.querySelector(`[data-card="${i}"]`);
+    const wI=card.querySelector(`input[data-s="${j}"][data-f="w"]`),rI=card.querySelector(`input[data-s="${j}"][data-f="r"]`);
+    const w=+(wI.value||wI.placeholder||0),r=+(rI.value||rI.placeholder||0),on=!cur.done;
+    draft[i][j]={w,r,done:on}; wI.value=w||''; rI.value=r||'';
+    tick.classList.toggle('on',on);
+    const done=Object.values(draft[i]).filter(x=>x.done).length;
+    card.querySelector('.pill').textContent=done+'/'+ex.s;
+    card.classList.toggle('done',done===ex.s);
+    if(on){
+      const pb=bestFor(ex.n);
+      if(w>0&&(!pb||w>pb.w)) flash('NEW HEAVIEST · '+ex.n.toUpperCase());
+      startRest(/Lateral|Giant|Fly|Pull-Apart/.test(ex.n)?60:120);
+      if(navigator.vibrate) navigator.vibrate(12);
+    }
+    meters(); persistDraft(); return;
+  }
+  const t=e.target.closest('.tab');
+  if(t){tab=t.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+    $('train').style.display=tab==='train'?'':'none';$('log').style.display=tab==='log'?'':'none';
+    if(tab==='log') renderLog();}
+});
+document.addEventListener('input',e=>{
+  const inp=e.target.closest('input[data-e]'); if(!inp) return;
+  const i=+inp.dataset.e,j=+inp.dataset.s;
+  draft[i]=draft[i]||{};draft[i][j]=draft[i][j]||{done:false};
+  draft[i][j][inp.dataset.f]=inp.value===''?'':+inp.value;
+  meters();persistDraft();
+});
+function startRest(sec){
+  clearInterval(restTimer);restLeft=sec;$('rest').classList.add('on');paint();
+  restTimer=setInterval(()=>{restLeft--;paint();
+    if(restLeft<=0){clearInterval(restTimer);$('rest').classList.remove('on');if(navigator.vibrate)navigator.vibrate([30,60,30]);}},1000);
+  function paint(){$('restT').textContent='REST '+Math.floor(restLeft/60)+':'+String(restLeft%60).padStart(2,'0');}
+}
+$('restX').onclick=()=>{clearInterval(restTimer);$('rest').classList.remove('on');};
+function flash(m){$('flash').textContent=m;$('flash').classList.add('on');clearTimeout(flashT);flashT=setTimeout(()=>$('flash').classList.remove('on'),2200);}
+$('save').onclick=async()=>{
+  const ex={};
+  PROGRAM[day].ex.forEach((e,i)=>{const sets=Object.values(draft[i]||{}).filter(s=>s.done).map(s=>({w:+s.w||0,r:+s.r||0}));
+    if(sets.length) ex[e.n]=sets;});
+  if(!Object.keys(ex).length){flash('LOG A SET FIRST');return;}
+  db.sessions[today]={day,ex};
+  try{await window.storage.set(STORE,JSON.stringify(db));await window.storage.delete(STORE+'-draft');
+    draft={};flash('SESSION SAVED');render();}catch(err){flash('SAVE FAILED — TRY AGAIN');}
+};
+load();
+</script>
+</body>
+</html>
